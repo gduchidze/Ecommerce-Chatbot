@@ -6,10 +6,11 @@ from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, Vector, ServerlessSpec
 
 # Initialize Pinecone (replace with your actual API key)
-pinecone = Pinecone(api_key="29fe7b06-67db-483f-87ec-906da52b6961")
-index_name = "producte"  # Customize the index name if needed
+pinecone = Pinecone(api_key="29fe7b06-67db-483f-87ec-906da52b6961") # ეს მხოლოდ იმიტომ არარი .env ში რომ გაგიმარტივდეს ტესტი
+index_name = "product_descriptions"  # Descriptive and informative name
 dimension = 384  # Dimension for the all-MiniLM-L6-v2 model
 
+# Check if the index exists, otherwise create it with serverless deployment on AWS us-east-1
 if index_name not in pinecone.list_indexes():
     pinecone.create_index(
         name=index_name, dimension=dimension, metric="cosine", spec=ServerlessSpec(cloud="aws", region="us-east-1")
@@ -35,27 +36,7 @@ def load_products(filepath):
             product_id = row['Uniq Id']  # Assuming this is the unique identifier
             description = preprocess_text(f"{row.get('About Product', '')} {row.get('Product Details', '')} "
                                             f"{row.get('Product Specification', '')} {row.get('Technical Details', '')}")
-            product_info = {
-                'name': row['Product Name'],
-                'brand_name': row.get('Brand Name', ''),  # Handle potential missing values
-                'asin': row.get('Asin', ''),
-                'category': row.get('Category', ''),
-                'upc_ean_code': row.get('Upc Ean Code', ''),
-                'list_price': row.get('List Price', ''),
-                'selling_price': row.get('Selling Price', ''),
-                'quantity': row.get('Quantity', ''),
-                'model_number': row.get('Model Number', ''),
-                'dimensions': row.get('Dimensions', ''),  # Assuming dimensions are combined
-                'color': row.get('Color', ''),
-                'ingredients': row.get('Ingredients', ''),
-                'direction_to_use': row.get('Direction To Use', ''),
-                'is_amazon_seller': row.get('Is Amazon Seller', ''),
-                'image': row.get('Image', ''),  # Handle potential image URLs
-                'variants': row.get('Variants', ''),
-                'sku': row.get('Sku', ''),
-                'product_url': row.get('Product Url', ''),  # Handle potential product URLs
-                'stock': row.get('Stock', ''),
-            }
+            product_info = {key.lower().replace(' ', '_'): value for key, value in row.items()}
             products[product_id] = product_info
 
             # Create a more comprehensive description for indexing
@@ -88,7 +69,11 @@ def main():
             print("Here are some products that might interest you:")
             for i, product_id in enumerate(relevant_product_ids):
                 product_info = get_product_details(product_id, products)
-                print(f"{i+1}. Name: {product_info['name']}")
+                print(f"{i+1}. Name: {product_info['product_name']}")
+                print(f"   Description: {product_info['about_product']}")
+                print(f"   Brand: {product_info['brand_name']}")
+                print(f"   Price: {product_info['list_price']}")
+                print(f"   Quantity: {product_info['quantity']}")
             print("Would you like to know more about any of these products? (Enter a number or 'no')")
             product_choice = input().lower()
             if product_choice.isdigit():
@@ -96,8 +81,10 @@ def main():
                 if 0 <= choice_index < len(relevant_product_ids):
                     chosen_product_id = relevant_product_ids[choice_index]
                     chosen_product_info = get_product_details(chosen_product_id, products)
-                    print(f"Here's more information about the {chosen_product_info['name']}:")
-                    print(f"Description: {chosen_product_info['description']}")
+                    print(f"Here's more information about the {chosen_product_info['product_name']}:")
+                    print(f"Description: {chosen_product_info['about_product']}")
+                    print(f"Technical Details: {chosen_product_info['technical_details']}")
+                    print(f"Product Specification: {chosen_product_info['product_specification']}")
                 else:
                     print("Invalid choice. Please try again.")
             else:
