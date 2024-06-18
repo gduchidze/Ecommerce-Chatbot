@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, Vector, ServerlessSpec
 
 # Initialize Pinecone (replace with your actual API key)
-pinecone = Pinecone(api_key="29fe7b06-67db-483f-87ec-906da52b6961")
+pinecone = Pinecone(api_key="29fe7b06-67db-483f-87ec-906da52b6961") # ზოგადად .env - ში მხოლოდ იმიტომ პაბლიქ რომ გატესტვა გაგიმარტივდეს
 index_name = "producte"  # Customize the index name if needed
 dimension = 384  # Dimension for the all-MiniLM-L6-v2 model
 
