@@ -5,8 +5,8 @@ from nltk.stem import WordNetLemmatizer
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, Vector, ServerlessSpec
 
-pinecone = Pinecone(api_key="29fe7b06-67db-483f-87ec-906da52b6961") # ეს მხოლოდ იმიტომ არარი .env ში რომ გაგიმარტივდეს ტესტი
-index_name = "product_descriptions"  # Descriptive and informative name
+pinecone = Pinecone(api_key="29fe7b06-67db-483f-87ec-906da52b6961") # for fast check, code is for [.env] 
+index_name = "giorgi"  # NEW INDEX FOR EVERY RUN !!!!!
 dimension = 384  # Dimension for the all-MiniLM-L6-v2 model
 
 # Check if the index exists, otherwise create it with serverless deployment on AWS us-east-1
