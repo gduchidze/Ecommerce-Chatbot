@@ -1,13 +1,19 @@
 import csv
+import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, Vector, ServerlessSpec
 
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
+
+
 # Initialize Pinecone (replace with your actual API key)
-pinecone = Pinecone(api_key="29fe7b06-67db-483f-87ec-906da52b6961") # ზოგადად .env - ში მხოლოდ იმიტომ პაბლიქ რომ გატესტვა გაგიმარტივდეს
-index_name = "producte"  # Customize the index name if needed
+pinecone = Pinecone(api_key="68fe7b22-8afc-4ca0-8e10-40e069a1d2bb") # ზოგადად .env - ში მხოლოდ იმიტომ პაბლიქ რომ გატესტვა გაგიმარტივდეს
+index_name = "erekl"  # Customize the index name if needed
 dimension = 384  # Dimension for the all-MiniLM-L6-v2 model
 
 if index_name not in pinecone.list_indexes():
@@ -77,7 +83,7 @@ def get_product_details(product_id, products):
 
 def main():
     print("Hi! I'm Giorgi, your friendly Amazon e-commerce support assistant. How can I help you today?")
-    products = load_products("data/sample_data_10k.csv")
+    products = load_products("sample_data_10k.csv")
     while True:
         query = input("What are you looking for? ").lower()
         if query == "exit":
