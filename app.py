@@ -5,19 +5,17 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, Vector, ServerlessSpec
-from dotenv import load_dotenv
-import os
 
 nltk.download('stopwords')
 nltk.download('punkt')
 nltk.download('wordnet')
 
-# Load environment variables
-load_dotenv()
+# Pinecone API key
+pinecone_api_key = "68fe7b22-8afc-4ca0-8e10-40e069a1d2bb"
 
-pinecone_api_key = os.getenv("68fe7b22-8afc-4ca0-8e10-40e069a1d2bb")
+# Initialize Pinecone
 pinecone = Pinecone(api_key=pinecone_api_key)
-index_name = "ere"  # Customize the index name if needed
+index_name = "ere"
 dimension = 384  # Dimension for the all-MiniLM-L6-v2 model
 
 if index_name not in pinecone.list_indexes():
@@ -76,7 +74,6 @@ def load_products(filepath):
 
 def search_products(query):
     query_vector = model.encode(query).tolist()
-    # Assign a dummy ID for the query vector
     response = index.query(vector=Vector(id='query', values=query_vector), top_k=5, include_metadata=True)
     relevant_product_ids = [match['id'] for match in response['matches']]
     return relevant_product_ids
