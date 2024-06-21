@@ -1,4 +1,3 @@
+pinecone-client
 nltk
 sentence-transformers
-pinecone
-torch
