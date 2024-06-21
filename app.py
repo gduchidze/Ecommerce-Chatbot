@@ -6,6 +6,10 @@ from nltk.stem import WordNetLemmatizer
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, Vector, ServerlessSpec
 
+#The code downloads some necessary data for language processing, 
+#like stopwords (common words like "and", "the") and rules for changing words to their 
+#root form (lemmatization).
+
 nltk.download('stopwords')
 nltk.download('punkt')
 nltk.download('wordnet')
@@ -23,18 +27,21 @@ if index_name not in pinecone.list_indexes():
         name=index_name, dimension=dimension, metric="cosine", spec=ServerlessSpec(cloud="aws", region="us-east-1")
     )
 
+#We load a smart model called all-MiniLM-L6-v2 which helps us turn sentences into numbers.
+
 index = pinecone.Index(index_name)
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
 
-
+#We create a function to clean up text by removing common words and changing words to their simplest form.
 def preprocess_text(text):
     words = word_tokenize(text.lower())
     filtered_words = [lemmatizer.lemmatize(word) for word in words if word.isalnum() and word not in stop_words]
     return ' '.join(filtered_words)
 
-
+# This function reads product data from a CSV file, cleans up the text descriptions, 
+# and stores them in Pinecone. It also keeps a local copy of the product information.
 def load_products(filepath):
     products = {}
     with open(filepath, 'r', encoding='utf-8') as file:
@@ -71,6 +78,8 @@ def load_products(filepath):
             index.upsert(vectors=[Vector(id=product_id, values=description_vector)])
     return products
 
+#This function takes a user's search query,
+#turns it into numbers, and searches Pinecone for the most similar product descriptions.
 
 def search_products(query):
     query_vector = model.encode(query).tolist()
@@ -82,6 +91,8 @@ def search_products(query):
 def get_product_details(product_id, products):
     return products.get(product_id, "Product not found.")
 
+#It loads the products, and then enters a loop where
+#it asks the user what they are looking for, searches for matching products, and displays the results.
 
 def main():
     print("Hi! I'm Giorgi, your friendly Amazon e-commerce support assistant. How can I help you today?")
