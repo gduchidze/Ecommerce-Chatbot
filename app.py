@@ -19,7 +19,7 @@ pinecone_api_key = "68fe7b22-8afc-4ca0-8e10-40e069a1d2bb"
 
 # Initialize Pinecone
 pinecone = Pinecone(api_key=pinecone_api_key)
-index_name = "ere"
+index_name = "new"
 dimension = 384  # Dimension for the all-MiniLM-L6-v2 model
 
 if index_name not in pinecone.list_indexes():
