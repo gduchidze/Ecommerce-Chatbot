@@ -5,15 +5,19 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone, Vector, ServerlessSpec
+from dotenv import load_dotenv
+import os
 
 nltk.download('stopwords')
 nltk.download('punkt')
 nltk.download('wordnet')
 
+# Load environment variables
+load_dotenv()
 
-# Initialize Pinecone (replace with your actual API key)
-pinecone = Pinecone(api_key="68fe7b22-8afc-4ca0-8e10-40e069a1d2bb") # ზოგადად .env - ში მხოლოდ იმიტომ პაბლიქ რომ გატესტვა გაგიმარტივდეს
-index_name = "erekl"  # Customize the index name if needed
+pinecone_api_key = os.getenv("68fe7b22-8afc-4ca0-8e10-40e069a1d2bb")
+pinecone = Pinecone(api_key=pinecone_api_key)
+index_name = "ere"  # Customize the index name if needed
 dimension = 384  # Dimension for the all-MiniLM-L6-v2 model
 
 if index_name not in pinecone.list_indexes():
@@ -43,7 +47,7 @@ def load_products(filepath):
                                           f"{row.get('Product Specification', '')} {row.get('Technical Details', '')}")
             product_info = {
                 'name': row['Product Name'],
-                'brand_name': row.get('Brand Name', ''),  # Handle potential missing values
+                'brand_name': row.get('Brand Name', ''),  
                 'asin': row.get('Asin', ''),
                 'category': row.get('Category', ''),
                 'upc_ean_code': row.get('Upc Ean Code', ''),
@@ -51,20 +55,20 @@ def load_products(filepath):
                 'selling_price': row.get('Selling Price', ''),
                 'quantity': row.get('Quantity', ''),
                 'model_number': row.get('Model Number', ''),
-                'dimensions': row.get('Dimensions', ''),  # Assuming dimensions are combined
+                'dimensions': row.get('Dimensions', ''), 
                 'color': row.get('Color', ''),
                 'ingredients': row.get('Ingredients', ''),
                 'direction_to_use': row.get('Direction To Use', ''),
                 'is_amazon_seller': row.get('Is Amazon Seller', ''),
-                'image': row.get('Image', ''),  # Handle potential image URLs
+                'image': row.get('Image', ''),  
                 'variants': row.get('Variants', ''),
                 'sku': row.get('Sku', ''),
-                'product_url': row.get('Product Url', ''),  # Handle potential product URLs
+                'product_url': row.get('Product Url', ''),  
                 'stock': row.get('Stock', ''),
+                'description': description  
             }
             products[product_id] = product_info
 
-            # Create a more comprehensive description for indexing
             description_vector = model.encode(description).tolist()
             index.upsert(vectors=[Vector(id=product_id, values=description_vector)])
     return products
@@ -72,7 +76,8 @@ def load_products(filepath):
 
 def search_products(query):
     query_vector = model.encode(query).tolist()
-    response = index.query(vector=Vector(values=query_vector), top_k=5, include_metadata=True)
+    # Assign a dummy ID for the query vector
+    response = index.query(vector=Vector(id='query', values=query_vector), top_k=5, include_metadata=True)
     relevant_product_ids = [match['id'] for match in response['matches']]
     return relevant_product_ids
 
