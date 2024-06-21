@@ -96,7 +96,7 @@ def get_product_details(product_id, products):
 
 def main():
     print("Hi! I'm Giorgi, your friendly Amazon e-commerce support assistant. How can I help you today?")
-    products = load_products("sample_data_10k.csv")
+    products = load_products("data/sample_data_10k.csv")
     while True:
         query = input("What are you looking for? ").lower()
         if query == "exit":
